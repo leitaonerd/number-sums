@@ -2,7 +2,8 @@
 #include <string.h>
 
 char nickname[30], arquivo[20];
-int matrizint[10][10], matriz[10][10], size, vidas;
+char* arquivos[] = { "iniciante.txt", "intermediario.txt", "avancado.txt" };
+int matrizint[10][10], matriz[10][10], size, vidas, fase = 0, arq = 0; pos = 0;
 int linhas[10], colunas[10];  // Variáveis globais para armazenar as somas de linhas e colunas
 
 FILE* fp;
@@ -10,7 +11,7 @@ FILE* fp;
 void clear();
 void StartLevel();
 void PrintMatriz();
-void Jogar();
+int Jogar();
 int TmnLevel(char txt);
 
 int main() {
@@ -22,7 +23,7 @@ int main() {
 
     clear();
     printf(".:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.:.\n");
-    printf("Ola, seja bem vindo ao jogo!\n\nDigite seu nickname: ");
+    printf("Ola, seja bem vindo ao Jogo das Somas!\n\nDigite seu nickname: ");
     scanf("%[^\n]s", nickname);
 
     int opcao = 0;
@@ -30,6 +31,7 @@ int main() {
         clear();
         printf("|| OPCOES ||\n\n");
         printf("1 - Jogar\n2 - Configuracoes\n3 - Instrucoes\n4 - Ranking\n5 - Sair\n\n");
+        printf("Fase: %d\n", fase+1);
         printf("Digite a opcao desejada\n");
         scanf("%d", &opcao);
 
@@ -37,13 +39,22 @@ int main() {
             // Jogar
             clear();
             StartLevel();  
-            Jogar();  
+            fase += (Jogar()); 
         }
         else if(opcao == 2){
             // Configurações
         }
         else if(opcao == 3){
             // Instruções
+            clear();
+            printf("\n\nINSTRUCOES SOBRE O JOGO DAS SOMAS\n\n");
+            printf("O objetivo deste jogo e simples, mas exige atencao e estrategia.\n\n");
+            printf("Acima e ao lado esquerdo do tabuleiro, existem alguns numeros que\ncorrespondem a soma da coluna abaixo ou da linha ao lado.\n");
+            printf("Voce deve informar as posicoes dos numeros que devem ser apagados para\nque restem apenas os numeros que, somados, resultem nessa soma.\n");
+            printf("Mas tome cuidado! Caso seja informado um numero que nao deve ser apagado, voce perdera 1 vida!\n\n");
+            printf("Agora voce ja entendeu como tudo funciona! Pressione <enter> para retornar ao menu\n");
+            getchar();
+            getchar();
         }
         else if(opcao == 4){
             // Ranking
@@ -58,73 +69,107 @@ void clear(){
     system("cls");  
 }
 
+
 void StartLevel() {
-    // Abre o arquivo
-    FILE* fp = fopen("iniciante.txt", "r");
-    if(fp == NULL) {
-        printf("Erro ao abrir o arquivo.\n");
+    // Abre o arquivo atual
+    FILE* fp = fopen(arquivos[arq], "r");
+    if (fp == NULL) {
+        printf("Erro ao abrir o arquivo %s.\n", arquivos[arq]);
         return;
     }
 
     // Limpa as matrizes e somas antes de carregar os dados
     memset(matriz, 0, sizeof(matriz));
     memset(matrizint, 0, sizeof(matrizint));
-    memset(linhas, 0, sizeof(linhas));  
-    memset(colunas, 0, sizeof(colunas));  
+    memset(linhas, 0, sizeof(linhas));
+    memset(colunas, 0, sizeof(colunas));
 
-    // Variáveis para auxiliar a leitura
-    char tmp;
-    int i = 0, j = 0;
+    int faseatual = 1;
+    char ch;
 
-    // Tamanho da matriz
-    size = 0;
-
-    // Lê a matriz principal e determina o tamanho
-    while (fscanf(fp, "%c", &tmp) == 1 && tmp != '\n') {
-        matriz[0][size++] = tmp - '0'; 
+    // Avança até a fase correta no arquivo
+    while (faseatual < fase && fscanf(fp, "%c", &ch) != EOF) {
+        if (ch == '*') {
+            faseatual++;
+        }
     }
 
-    // Lê a matriz
-    for (i = 1; i < size; i++) {
-        for (j = 0; j < size; j++) {
-            fscanf(fp, "%c", &tmp);
-            matriz[i][j] = tmp - '0';
+    // Verifica se a fase foi encontrada
+    if (faseatual < fase) {
+        fclose(fp);
+        arq++;
+
+        // Se for a última fase do arquivo, vai para o próximo arquivo
+        if (arq >= 3) {
+            printf("Parabéns! Você completou todas as fases disponíveis.\n");
+            arq = 0;
+            fase = 1;
+        } else {
+            fase = 1;  // Reinicia a fase para 1 ao passar para o próximo arquivo
+            StartLevel();  // Recursão para iniciar o próximo arquivo
+        }
+        return;
+    }
+
+    // Determina o tamanho da matriz lendo a primeira linha
+    size = 0;
+    while (fscanf(fp, "%c", &ch) == 1 && ch != '\n') {
+        matriz[0][size++] = ch - '0';  // Primeira linha
+    }
+
+    // Lê o restante da matriz
+    for (int i = 1; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            fscanf(fp, "%c", &ch);
+            matriz[i][j] = ch - '0';
         }
         fscanf(fp, "%*c");  // Pula o \n
     }
 
+    // Lê as somas das colunas e linhas
+    char linha_colunas[50], linha_linhas[50];
+
+    // Pula possíveis quebras de linha adicionais
+    fscanf(fp, "%*[\n]");
+
     // Carrega as somas das colunas
-    char colunastmp[2 * size + 1];
-    fscanf(fp, "%s", colunastmp);
-    for (i = 0, j = 0; i < size; i++, j += 2) {
-        colunas[i] = (colunastmp[j] - '0') * 10 + (colunastmp[j + 1] - '0');
+    if (fscanf(fp, "%s", linha_colunas) != 1) {
+        printf("Erro ao ler somas das colunas.\n");
+        fclose(fp);
+        return;
+    }
+    for (int i = 0; i < size; i++) {
+        colunas[i] = (linha_colunas[i * 2] - '0') * 10 + (linha_colunas[i * 2 + 1] - '0');
     }
 
     // Carrega as somas das linhas
-    char linhastmp[2 * size + 1];
-    fscanf(fp, "%s", linhastmp);
-    for (i = 0, j = 0; i < size; i++, j += 2) {
-        linhas[i] = (linhastmp[j] - '0') * 10 + (linhastmp[j + 1] - '0');
+    if (fscanf(fp, "%s", linha_linhas) != 1) {
+        printf("Erro ao ler somas das linhas.\n");
+        fclose(fp);
+        return;
+    }
+    for (int i = 0; i < size; i++) {
+        linhas[i] = (linha_linhas[i * 2] - '0') * 10 + (linha_linhas[i * 2 + 1] - '0');
     }
 
-    // Carrega a matriz de comparação (matrizint)
-    for (i = 0; i < size; i++) {
-        for (j = 0; j < size; j++) {
-            fscanf(fp, " %c", &tmp); 
-            matrizint[i][j] = tmp - '0';
+    // Lê a matriz de comparação
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            fscanf(fp, " %c", &ch);  // Espaço antes de %c para ignorar whitespace
+            matrizint[i][j] = ch - '0';
         }
     }
 
-    // Lê o *
-    fscanf(fp, "%*c");
-
     // Fecha o arquivo
     fclose(fp);
-    
+
+    // Inicializa as vidas
     vidas = 5;
-    // Print na tela
+
+    // Imprime na tela
     PrintMatriz();
 }
+
 
 
 void PrintMatriz() {
@@ -156,7 +201,7 @@ void PrintMatriz() {
     printf("*** Voce tem %d vidas ***\n", vidas);
 }
 
-void Jogar() {
+int Jogar() {
     int linha, coluna;
     vidas = 5;
 
@@ -213,7 +258,7 @@ void Jogar() {
                 linhas[linha] = -1;
                 if (coluna_completa) {
                     colunas[coluna] = -1;  
-                    printf("Parabens! Voce completou a linha % e a coluna %d! Tecle <enter>\n", linha + 1, coluna + 1);
+                    printf("Parabens! Voce completou a linha %d e a coluna %d! Tecle <enter>\n", linha + 1, coluna + 1);
                     getchar();
                 }
                 else{
@@ -242,6 +287,7 @@ void Jogar() {
         if (jogo_completo) {
             printf("Parabens! Voce completou o jogo! Tecle <enter> para voltar ao menu\n");
             getchar();
+            return 1;
             break;
         }
         PrintMatriz();
@@ -249,6 +295,7 @@ void Jogar() {
 
     if (vidas == 0) {
         printf("Game Over! Voce perdeu todas as suas vidas.\n");
+        return 0;
     }
     
 }
