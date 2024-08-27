@@ -36,8 +36,8 @@ int main() {
         if(opcao == 1){
             // Jogar
             clear();
-            StartLevel();  // Inicializa o nível
-            Jogar();  // Executa o jogo
+            StartLevel();  
+            Jogar();  
         }
         else if(opcao == 2){
             // Configurações
@@ -66,25 +66,25 @@ void StartLevel() {
         return;
     }
 
-    // Limpa as matrizes antes de carregar os dados
+    // Limpa as matrizes e somas antes de carregar os dados
     memset(matriz, 0, sizeof(matriz));
     memset(matrizint, 0, sizeof(matrizint));
-    memset(linhas, 0, sizeof(linhas));  // Limpa as somas das linhas
-    memset(colunas, 0, sizeof(colunas));  // Limpa as somas das colunas
+    memset(linhas, 0, sizeof(linhas));  
+    memset(colunas, 0, sizeof(colunas));  
 
     // Variáveis para auxiliar a leitura
     char tmp;
     int i = 0, j = 0;
 
-    // Inicializa o tamanho da matriz
+    // Tamanho da matriz
     size = 0;
 
     // Lê a matriz principal e determina o tamanho
     while (fscanf(fp, "%c", &tmp) == 1 && tmp != '\n') {
-        matriz[0][size++] = tmp - '0';  // Primeira linha
+        matriz[0][size++] = tmp - '0'; 
     }
 
-    // Lê as próximas linhas da matriz
+    // Lê a matriz
     for (i = 1; i < size; i++) {
         for (j = 0; j < size; j++) {
             fscanf(fp, "%c", &tmp);
@@ -110,12 +110,12 @@ void StartLevel() {
     // Carrega a matriz de comparação (matrizint)
     for (i = 0; i < size; i++) {
         for (j = 0; j < size; j++) {
-            fscanf(fp, " %c", &tmp);  // Note the space before %c to skip any whitespace
+            fscanf(fp, " %c", &tmp); 
             matrizint[i][j] = tmp - '0';
         }
     }
 
-    // Lê o delimitador de nível '*' e prepara para o próximo nível (se necessário)
+    // Lê o *
     fscanf(fp, "%*c");
 
     // Fecha o arquivo
@@ -129,7 +129,7 @@ void StartLevel() {
 
 void PrintMatriz() {
     clear();
-    // Exibe os números das colunas no topo
+    
     printf("    ");
     for (int i = 0; i < size; i++) {
         if(colunas[i] == -1) printf("   ");
@@ -137,16 +137,16 @@ void PrintMatriz() {
     }
     printf("\n    ");
     for (int i = 0; i < size; i++) {
-        printf("---");
+        printf("___");
     }
-    printf("\n");
-    // Exibe a matriz
+    printf("_\n");
+    
     for (int i = 0; i < size; i++) {
         if(linhas[i] == -1) printf("   |");
         else printf("%3d|", linhas[i]);
         for (int j = 0; j < size; j++) {
             if (matriz[i][j] == -1) {
-                printf("   ");  // Exibe um espaço vazio se foi apagado
+                printf("   ");  
             } else {
                 printf("%3d", matriz[i][j]);
             }
@@ -173,11 +173,11 @@ void Jogar() {
             continue;
         }
 
-        // Ajusta para índice 0-baseado
+        // Ajusta indice para 0
         linha--;
         coluna--;
 
-        // Verifica se a posição já foi apagada
+        // Verifica se já foi apagada
         if (matriz[linha][coluna] == -1) {
             printf("Essa posicao ja foi apagada! Pressione <enter> para tentar de novo\n");
             getchar();
@@ -202,20 +202,27 @@ void Jogar() {
             // Verifica se a linha ou coluna está completa
             int linha_completa = 1, coluna_completa = 1;
             for (int i = 0; i < size; i++) {
-                if (matriz[linha][i] != -1 && matrizint[linha][i] != 1)  // Ainda há números a serem apagados na linha
+                if (matriz[linha][i] != -1 && matrizint[linha][i] != 1)  
                     linha_completa = 0;
-                if (matriz[i][coluna] != -1 && matrizint[i][coluna] != 1)  // Ainda há números a serem apagados na coluna
+                if (matriz[i][coluna] != -1 && matrizint[i][coluna] != 1) 
                     coluna_completa = 0;
             }
 
             // Apaga o valor correspondente se a linha ou coluna estiver completa
             if (linha_completa) {
-                linhas[linha] = -1;  // Apaga a soma da linha
+                linhas[linha] = -1;
+                if (coluna_completa) {
+                    colunas[coluna] = -1;  
+                    printf("Parabens! Voce completou a linha % e a coluna %d! Tecle <enter>\n", linha + 1, coluna + 1);
+                    getchar();
+                }
+                else{
                 printf("Parabens! Voce completou a linha %d! Tecle <enter>\n", linha + 1);
                 getchar();
+                }
             }
-            if (coluna_completa) {
-                colunas[coluna] = -1;  // Apaga a soma da coluna
+            else if (coluna_completa) {
+                colunas[coluna] = -1;  
                 printf("Parabens! Voce completou a coluna %d! Tecle <enter>\n", coluna + 1);
                 getchar();
             }
@@ -233,7 +240,7 @@ void Jogar() {
             if (!jogo_completo) break;
         }
         if (jogo_completo) {
-            printf("Parabens! Voce completou o jogo! Tecle <enter> para voltar\n");
+            printf("Parabens! Voce completou o jogo! Tecle <enter> para voltar ao menu\n");
             getchar();
             break;
         }
