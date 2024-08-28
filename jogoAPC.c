@@ -13,7 +13,7 @@ typedef struct {
     int pontuacao;
 } dadosjogador;
 
-char nickname[30], arquivo[20];
+char nickname[20], arquivo[20];
 char* arquivos[] = { "iniciante.txt", "intermediario.txt", "avancado.txt" };
 int matrizint[10][10], matriz[10][10], linhas[10], colunas[10];
 int size, vidas, fase = 0, arq = 0, pos = 0, morreu = 0, pont = 0, nvjog = 1, qtdjog = 0, posrnk;
@@ -81,6 +81,8 @@ int main() {
                     int um = 1;
                     fwrite(&um, sizeof(int), 1, fr);
                     memset(ranking, 0, sizeof(ranking));
+                    qtdjog = 0;
+                    StartRanking();
                 }
             }
             else if(config == 2){
@@ -393,6 +395,7 @@ int Jogar() {
         morreu = 1;
         return 0;
     }
+    return 0;
 }
 
 void StartRanking(){
@@ -423,10 +426,11 @@ void StartRanking(){
         qtdjog++;
     }
     fclose(fr);
+    posrnk = qtdjog;
 }
 
 void AttRanking(){
-    ranking[qtdjog].pontuacao = jogadoratual.pontuacao;
+    ranking[posrnk].pontuacao = jogadoratual.pontuacao;
 
     int ok = 0;
     for(int j = 0; j < qtdjog && ok == 0; j++){
@@ -446,7 +450,7 @@ void AttRanking(){
 }
 
 void SaveRanking(){
-    rewind(fr);
+    fr = fopen("ranking.bin", "r+b");
     fwrite(&qtdjog, sizeof(int), 1, fr);
     fwrite(&ranking, sizeof(dadosjogador), qtdjog, fr);
     fclose(fr);
