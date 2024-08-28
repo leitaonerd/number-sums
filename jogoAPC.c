@@ -39,7 +39,6 @@ int main() {
     clear();
     printf("Seja bem vindo ao Sudoku ao Contrario!\n\nDigite seu nickname: ");
     scanf("%s", nickname);
-    StartRanking();
 
     int opcao = 0;
     while(opcao != 5){
@@ -55,6 +54,7 @@ int main() {
             clear();
             StartLevel();  
             Jogar();
+            if(morreu == 0) StartRanking();
             AttRanking();
             SaveRanking();
         }
@@ -84,10 +84,8 @@ int main() {
                     int um = 1;
                     fwrite(&um, sizeof(int), 1, fr);
                     memset(ranking, 0, sizeof(ranking));
+                    jogadoratual.pontuacao = 0;
                     qtdjog = 0;
-                    StartRanking();
-                    /*Tomei a liberdade de recriar o ranking já contendo o jogador atual da sessão com 0 pontos, como
-                    normalmente é feito em outros jogos.*/ 
                 }
             }
             else if(config == 2){
@@ -129,8 +127,8 @@ int main() {
             printf("\n\nCOMO JOGAR O SUDOKU AO CONTRARIO\n\n");
             printf("O objetivo deste jogo e simples, mas exige atencao e estrategia.\n\n");
             printf("Acima e ao lado esquerdo do tabuleiro, existem alguns numeros que\ncorrespondem a soma da coluna abaixo ou da linha ao lado.\n");
-            printf("Voce deve informar as posicoes dos numeros que devem ser apagados para\nque restem apenas os numeros que, somados, resultem nessa soma.\n");
-            printf("Mas tome cuidado! Caso seja informado um numero que nao deve ser apagado, voce perdera 1 vida!\n\n");
+            printf("Voce deve informar as posicoes dos numeros que devem ser apagados\nparaque restem apenas os numeros que, somados, resultem nessa\nsoma.\n");
+            printf("Mas tome cuidado! Caso seja informado um numero que nao deve ser \napagado, voce perdera 1 vida!\n\n");
             printf("Agora voce ja entendeu como tudo funciona! Pressione <enter> para retornar ao menu\n");
             getchar();
             getchar();
@@ -431,11 +429,9 @@ void StartRanking(){
     }
 
     // Se for um novo jogador, armazena dados atuais no ranking 
-    //OBS: mostrar os dados do jogador atual desde o inicio da sessão foi uma escolha que eu tomei por conta própria
     if(nvjog == 1){
         strcpy(jogadoratual.nome, nickname);
         strcpy(ranking[qtdjog].nome, nickname);
-        jogadoratual.pontuacao = pont;
         qtdjog++;
     }
     fclose(fr);
