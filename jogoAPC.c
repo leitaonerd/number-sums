@@ -1,3 +1,6 @@
+// Matrícula: 241020760
+// Rafael Medeiros de Alencar
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -16,7 +19,7 @@ typedef struct {
 char nickname[20], arquivo[20];
 char* arquivos[] = { "iniciante.txt", "intermediario.txt", "avancado.txt" };
 int matrizint[10][10], matriz[10][10], linhas[10], colunas[10];
-int size, vidas, fase = 0, arq = 0, pos = 0, morreu = 0, pont = 0, nvjog = 1, qtdjog = 0, posrnk;
+int size, vidas, fase = 0, arq = 0, pos = 0, morreu = 0, pont = 0, nvjog = 1, qtdjog = 0;
 dadosjogador ranking[100], jogadoratual;
 
 FILE* fp;
@@ -34,7 +37,7 @@ void SaveRanking();
 int main() {
 
     clear();
-    printf("Ola, seja bem vindo ao Jogo das Somas!\n\nDigite seu nickname: ");
+    printf("Seja bem vindo ao Sudoku ao Contrario!\n\nDigite seu nickname: ");
     scanf("%s", nickname);
     StartRanking();
 
@@ -43,7 +46,7 @@ int main() {
         clear();
         printf("|| OPCOES ||\n\n");
         printf("1 - Jogar\n2 - Configuracoes\n3 - Instrucoes\n4 - Ranking\n5 - Sair\n\n");
-        printf("Fase: %d\n", fase+1);
+        printf("Dificuldade: %d  - Fase: %d\n", arq+1, fase+1); // Nao estava no roteiro, coloquei pra me auxiliar nos testes. Acabei gostando e deixei
         printf("Digite a opcao desejada: ");
         scanf("%d", &opcao);
 
@@ -57,7 +60,7 @@ int main() {
         }
         else if(opcao == 2){
             // Configurações
-            OP: clear();
+            OP: clear(); // Clamo benevolência, meus prezados monitores e/ou professora, mas foi uma otimização necessária
             printf("*** CONFIGURACOES ***\n\n");
             printf("1 - Zerar Ranking\n2 - Modo de Dificuldade\n3 - Voltar ao menu principal\n\n");
             printf("Digite a opcao desejada: ");
@@ -73,7 +76,7 @@ int main() {
                 if(a == 'N' || a == 'n'){
                     config = 0;
                     opcao = 2;
-                    goto OP;
+                    goto OP; // Novamente, perdão! Mas foi inevitável
                 }
                 else if(a == 'S' || a == 's'){
                     fclose(fr);
@@ -83,12 +86,14 @@ int main() {
                     memset(ranking, 0, sizeof(ranking));
                     qtdjog = 0;
                     StartRanking();
+                    /*Tomei a liberdade de recriar o ranking já contendo o jogador atual da sessão com 0 pontos, como
+                    normalmente é feito em outros jogos.*/ 
                 }
             }
             else if(config == 2){
                 DIF: clear();
                 printf("*** ESCOLHA O MODO DE JOGO ***\n\n");
-                printf("1- Iniciante\n2 - Intermediario\n3 - Avancado\n4 - Retornar\n\n");
+                printf("1 - Iniciante\n2 - Intermediario\n3 - Avancado\n4 - Retornar\n\n");
                 printf("Digite a opcao desejada: ");
 
                 int selectdif;
@@ -121,7 +126,7 @@ int main() {
         else if(opcao == 3){
             // Instruções
             clear();
-            printf("\n\nINSTRUCOES SOBRE O JOGO DAS SOMAS\n\n");
+            printf("\n\nCOMO JOGAR O SUDOKU AO CONTRARIO\n\n");
             printf("O objetivo deste jogo e simples, mas exige atencao e estrategia.\n\n");
             printf("Acima e ao lado esquerdo do tabuleiro, existem alguns numeros que\ncorrespondem a soma da coluna abaixo ou da linha ao lado.\n");
             printf("Voce deve informar as posicoes dos numeros que devem ser apagados para\nque restem apenas os numeros que, somados, resultem nessa soma.\n");
@@ -129,9 +134,11 @@ int main() {
             printf("Agora voce ja entendeu como tudo funciona! Pressione <enter> para retornar ao menu\n");
             getchar();
             getchar();
+            //perdão, mas eu nao quis fazer uma função auxiliar pras intruções
         }
         else if(opcao == 4){
             // Ranking
+            // Pelas imagens do roteiro, nao precisava dar clear no terminal na opção do ranking
             printf("\nRANKING:\n\n");
             for(int i = 0; i < qtdjog; i++){
                 printf("%d - %s\n", ranking[i].pontuacao, ranking[i].nome);
@@ -139,6 +146,7 @@ int main() {
             printf("\nTecle <enter> para continuar>");
             getchar();
             getchar();
+            
         }
     }
 
@@ -247,7 +255,7 @@ void StartLevel() {
     // Lê a matriz de comparação
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            fscanf(fp, "%c", &ch);  // Espaço antes de %c para ignorar whitespace
+            fscanf(fp, "%c", &ch); 
             matrizint[i][j] = ch - '0';
         }
         fscanf(fp, "%*c");
@@ -320,7 +328,7 @@ int Jogar() {
             continue;
         }
 
-        // Verifica se a posição é uma bomba
+        // Verifica se a posição é inválida
         if (matrizint[linha][coluna] == 1) {
             vidas--;
             printf("Voce perdeu uma vida! Tecle <enter> para prosseguir\n");
@@ -328,6 +336,7 @@ int Jogar() {
             getchar();
             continue;
         } 
+        // Se a posição é válida:
         else if (matrizint[linha][coluna] == 0) {
             matriz[linha][coluna] = -1;  // Marca como apagado
             printf("Muito bem! Tecle <enter> para continuar\n");
@@ -399,26 +408,30 @@ int Jogar() {
 }
 
 void StartRanking(){
+    // Abre o arquivo do ranking ou cria um novo
     fr = fopen("ranking.bin", "r+b");
     if(fr == NULL){
         fopen("ranking.bin", "w+b");
         int um = 0;
-        fwrite(&um, sizeof(int), 1, fr);
+        fwrite(&um, sizeof(int), 1, fr); // salva um int no inicio do arquivo com a quantidade de jogadores no ranking
     }
     else{
-        fread(&qtdjog, sizeof(int), 1, fr);
-        fread(&ranking, sizeof(dadosjogador), qtdjog, fr);
+        fread(&qtdjog, sizeof(int), 1, fr); // lê um int no inicio do arquivo com a quantidade de jogadores no ranking
+        fread(&ranking, sizeof(dadosjogador), qtdjog, fr); //
     }
 
+    // Verifica se o nickname atual já está no ranking
     nvjog = 1;
     for(int i = 0; i < qtdjog-1; i++){
         if(strcmp(ranking[i].nome, nickname) == 0){
-            jogadoratual = ranking[i];
+            jogadoratual = ranking[i]; // Caso esteja, carrega para o programa os dados relacionados
             nvjog = 0;
             break;
         }
     }
 
+    // Se for um novo jogador, armazena dados atuais no ranking 
+    //OBS: mostrar os dados do jogador atual desde o inicio da sessão foi uma escolha que eu tomei por conta própria
     if(nvjog == 1){
         strcpy(jogadoratual.nome, nickname);
         strcpy(ranking[qtdjog].nome, nickname);
@@ -426,31 +439,42 @@ void StartRanking(){
         qtdjog++;
     }
     fclose(fr);
-    posrnk = qtdjog;
 }
 
 void AttRanking(){
-    ranking[posrnk].pontuacao = jogadoratual.pontuacao;
+    // Procura o jogador atual no vetor do ranking
+    /*OBS: eu tentei fazer isso de um jeito mais simples e otimizado, mas por incapacidade e/ou cansaço não fui capaz...
+    Fui obrigado a escolher funcionalidade antes de elegância*/
+    int a;
+    for(a = 0; a < qtdjog; a++){
+        if(strcmp(ranking[a].nome, nickname) == 0){
+            break;
+        }
+    }
+    // Atualiza a pontuacao
+    ranking[a].pontuacao = jogadoratual.pontuacao;
 
+    // Ordena o ranking
+    /*Bubblesort otimizado, faltou tempo para implementar o quicksort adequadamente e dado o tamanho
+    esperado para este ranking, não deve ser um problema*/ 
     int ok = 0;
     for(int j = 0; j < qtdjog && ok == 0; j++){
         ok = 1;
         for(int i = 0; i < qtdjog-j-1; i++){
             if(ranking[i].pontuacao < ranking[i+1].pontuacao){
                 ok = 0;
-                int aux = ranking[i].pontuacao;
-                ranking[i].pontuacao = ranking[i+1].pontuacao;
-                ranking[i+1].pontuacao = aux;
-
-                if(i+1 == qtdjog) posrnk--;
-                else if(i == qtdjog) posrnk++;
+                dadosjogador aux = ranking[i];
+                ranking[i] = ranking[i+1];
+                ranking[i+1] = aux;
             }
         }
     }
 }
 
 void SaveRanking(){
+    // Abre o arquivo do ranking
     fr = fopen("ranking.bin", "r+b");
+    // Escreve os dados e fecha
     fwrite(&qtdjog, sizeof(int), 1, fr);
     fwrite(&ranking, sizeof(dadosjogador), qtdjog, fr);
     fclose(fr);
