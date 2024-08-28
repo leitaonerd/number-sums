@@ -35,7 +35,7 @@ int main() {
 
     clear();
     printf("Ola, seja bem vindo ao Jogo das Somas!\n\nDigite seu nickname: ");
-    scanf("%[^\n]s", nickname);
+    scanf("%s", nickname);
     StartRanking();
 
     int opcao = 0;
@@ -51,9 +51,9 @@ int main() {
             // Jogar
             clear();
             StartLevel();  
-            jogadoratual.pontuacao += Jogar();
+            Jogar();
             AttRanking();
-            
+            SaveRanking();
         }
         else if(opcao == 2){
             // Configurações
@@ -62,11 +62,12 @@ int main() {
             printf("1 - Zerar Ranking\n2 - Modo de Dificuldade\n3 - Voltar ao menu principal\n\n");
             printf("Digite a opcao desejada: ");
             
-            int config = 0;
+            int config;
             scanf("%d", &config);
             if(config == 1){
                 printf("Confirma reinicializar o ranking? (S/N) ");
                 char a;
+                getchar();
                 scanf("%c", &a);
 
                 if(a == 'N' || a == 'n'){
@@ -88,7 +89,7 @@ int main() {
                 printf("1- Iniciante\n2 - Intermediario\n3 - Avancado\n4 - Retornar\n\n");
                 printf("Digite a opcao desejada: ");
 
-                int selectdif = 0;
+                int selectdif;
                 scanf("%d", &selectdif);
                 if(selectdif == 4) goto OP;
                 else if(selectdif > 4){
@@ -105,6 +106,7 @@ int main() {
                     
                     arq = selectdif-1;
                     fase = 0;
+                    morreu = 0;
                     fclose(fp);
 
                     printf("Tecle <enter> para continuar:");
@@ -374,9 +376,10 @@ int Jogar() {
             printf("Parabens! Voce completou a fase! Tecle <enter> para voltar ao menu\n");
             getchar();
             fase++;
-            if(arq == 0) return 50;
-            else if(arq == 1) return 100;
-            else if(arq == 2) return 200;
+            if(arq == 0) jogadoratual.pontuacao += 50;
+            else if(arq == 1) jogadoratual.pontuacao += 100;
+            else if(arq == 2) jogadoratual.pontuacao += 200;
+            return 1;
         
         }
         PrintMatriz();
@@ -396,13 +399,13 @@ void StartRanking(){
     fr = fopen("ranking.bin", "r+b");
     if(fr == NULL){
         fopen("ranking.bin", "w+b");
-        int um = 1;
+        int um = 0;
         fwrite(&um, sizeof(int), 1, fr);
     }
-
-    rewind(fr);
-    fread(&qtdjog, sizeof(int), 1, fr);
-    fread(&ranking, sizeof(dadosjogador), qtdjog, fr);
+    else{
+        fread(&qtdjog, sizeof(int), 1, fr);
+        fread(&ranking, sizeof(dadosjogador), qtdjog, fr);
+    }
 
     nvjog = 1;
     for(int i = 0; i < qtdjog-1; i++){
@@ -415,10 +418,11 @@ void StartRanking(){
 
     if(nvjog == 1){
         strcpy(jogadoratual.nome, nickname);
-        strcpy(ranking[qtdjog+1].nome, nickname);
+        strcpy(ranking[qtdjog].nome, nickname);
         jogadoratual.pontuacao = pont;
         qtdjog++;
     }
+    fclose(fr);
 }
 
 void AttRanking(){
