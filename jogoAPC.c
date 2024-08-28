@@ -16,22 +16,27 @@ typedef struct {
 char nickname[30], arquivo[20];
 char* arquivos[] = { "iniciante.txt", "intermediario.txt", "avancado.txt" };
 int matrizint[10][10], matriz[10][10], linhas[10], colunas[10];
-int size, vidas, fase = 0, arq = 0, pos = 0, morreu = 0, pont = 0;
-dadosjogador ranking[100];
+int size, vidas, fase = 0, arq = 0, pos = 0, morreu = 0, pont = 0, nvjog = 1, qtdjog = 0, posrnk;
+dadosjogador ranking[100], jogadoratual;
 
 FILE* fp;
+FILE* fr;
 
 void clear();
 void StartLevel();
 void PrintMatriz();
 int Jogar();
 int TmnLevel(char txt);
+void StartRanking();
+void AttRanking();
+void SaveRanking();
 
 int main() {
 
     clear();
     printf("Ola, seja bem vindo ao Jogo das Somas!\n\nDigite seu nickname: ");
     scanf("%[^\n]s", nickname);
+    StartRanking();
 
     int opcao = 0;
     while(opcao != 5){
@@ -39,18 +44,75 @@ int main() {
         printf("|| OPCOES ||\n\n");
         printf("1 - Jogar\n2 - Configuracoes\n3 - Instrucoes\n4 - Ranking\n5 - Sair\n\n");
         printf("Fase: %d\n", fase+1);
-        printf("Digite a opcao desejada\n");
+        printf("Digite a opcao desejada: ");
         scanf("%d", &opcao);
 
         if(opcao == 1){
             // Jogar
             clear();
             StartLevel();  
-            pont += Jogar();
+            jogadoratual.pontuacao += Jogar();
+            AttRanking();
             
         }
         else if(opcao == 2){
             // Configurações
+            OP: clear();
+            printf("*** CONFIGURACOES ***\n\n");
+            printf("1 - Zerar Ranking\n2 - Modo de Dificuldade\n3 - Voltar ao menu principal\n\n");
+            printf("Digite a opcao desejada: ");
+            
+            int config = 0;
+            scanf("%d", &config);
+            if(config == 1){
+                printf("Confirma reinicializar o ranking? (S/N) ");
+                char a;
+                scanf("%c", &a);
+
+                if(a == 'N' || a == 'n'){
+                    config = 0;
+                    opcao = 2;
+                    goto OP;
+                }
+                else if(a == 'S' || a == 's'){
+                    fclose(fr);
+                    fr = fopen("ranking.bin", "w+b");
+                    int um = 1;
+                    fwrite(&um, sizeof(int), 1, fr);
+                    memset(ranking, 0, sizeof(ranking));
+                }
+            }
+            else if(config == 2){
+                DIF: clear();
+                printf("*** ESCOLHA O MODO DE JOGO ***\n\n");
+                printf("1- Iniciante\n2 - Intermediario\n3 - Avancado\n4 - Retornar\n\n");
+                printf("Digite a opcao desejada: ");
+
+                int selectdif = 0;
+                scanf("%d", &selectdif);
+                if(selectdif == 4) goto OP;
+                else if(selectdif > 4){
+                    printf("Opcao invalida. Tecle <enter> e escolha novamente.");
+                    getchar();
+                    getchar();
+                    goto DIF;
+                }
+                else{
+                    printf("\n\nConfigurado para modo ");
+                    if(selectdif == 1) printf("INICIANTE.\n");
+                    else if(selectdif == 2) printf("INTERMEDIARIO.\n");
+                    else if(selectdif == 3) printf("AVANCADO.\n");
+                    
+                    arq = selectdif-1;
+                    fase = 0;
+                    fclose(fp);
+
+                    printf("Tecle <enter> para continuar:");
+                    getchar();
+                    getchar();
+                }
+
+            }
         }
         else if(opcao == 3){
             // Instruções
@@ -66,9 +128,17 @@ int main() {
         }
         else if(opcao == 4){
             // Ranking
+            printf("\nRANKING:\n\n");
+            for(int i = 0; i < qtdjog; i++){
+                printf("%d - %s\n", ranking[i].pontuacao, ranking[i].nome);
+            }
+            printf("\nTecle <enter> para continuar>");
+            getchar();
+            getchar();
         }
     }
 
+    SaveRanking();
     fclose(fp);
     return 0;
 }
@@ -130,7 +200,7 @@ void StartLevel() {
     size = 0;
     if(arq == 0) size = 4;
     else if(arq == 1) size = 6;
-    else size = 7;
+    else if(arq == 2) size = 7;
 
     // Lê o restante da matriz
     for (int i = 0; i < size; i++) {
@@ -320,4 +390,60 @@ int Jogar() {
         morreu = 1;
         return 0;
     }
+}
+
+void StartRanking(){
+    fr = fopen("ranking.bin", "r+b");
+    if(fr == NULL){
+        fopen("ranking.bin", "w+b");
+        int um = 1;
+        fwrite(&um, sizeof(int), 1, fr);
+    }
+
+    rewind(fr);
+    fread(&qtdjog, sizeof(int), 1, fr);
+    fread(&ranking, sizeof(dadosjogador), qtdjog, fr);
+
+    nvjog = 1;
+    for(int i = 0; i < qtdjog-1; i++){
+        if(strcmp(ranking[i].nome, nickname) == 0){
+            jogadoratual = ranking[i];
+            nvjog = 0;
+            break;
+        }
+    }
+
+    if(nvjog == 1){
+        strcpy(jogadoratual.nome, nickname);
+        strcpy(ranking[qtdjog+1].nome, nickname);
+        jogadoratual.pontuacao = pont;
+        qtdjog++;
+    }
+}
+
+void AttRanking(){
+    ranking[qtdjog].pontuacao = jogadoratual.pontuacao;
+
+    int ok = 0;
+    for(int j = 0; j < qtdjog && ok == 0; j++){
+        ok = 1;
+        for(int i = 0; i < qtdjog-j-1; i++){
+            if(ranking[i].pontuacao < ranking[i+1].pontuacao){
+                ok = 0;
+                int aux = ranking[i].pontuacao;
+                ranking[i].pontuacao = ranking[i+1].pontuacao;
+                ranking[i+1].pontuacao = aux;
+
+                if(i+1 == qtdjog) posrnk--;
+                else if(i == qtdjog) posrnk++;
+            }
+        }
+    }
+}
+
+void SaveRanking(){
+    rewind(fr);
+    fwrite(&qtdjog, sizeof(int), 1, fr);
+    fwrite(&ranking, sizeof(dadosjogador), qtdjog, fr);
+    fclose(fr);
 }
