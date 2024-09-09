@@ -39,7 +39,7 @@ int main() {
     clear();
     printf("Seja bem vindo ao Sudoku ao Contrario!\n\nDigite seu nickname: ");
     scanf("%s", nickname);
-    StartRanking();
+    StartRanking(); //Se abriu meu jogo já merece entrar no ranking. Todos são vencedores!
 
     int opcao = 0;
     while(opcao != 5){
@@ -422,7 +422,7 @@ void StartRanking(){
 
     // Verifica se o nickname atual já está no ranking
     nvjog = 1;
-    for(int i = 0; i < qtdjog-1; i++){
+    for(int i = 0; i < qtdjog; i++){
         if(strcmp(ranking[i].nome, nickname) == 0){
             jogadoratual = ranking[i]; // Caso esteja, carrega para o programa os dados relacionados
             nvjog = 0;
