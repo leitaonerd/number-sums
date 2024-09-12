@@ -17,7 +17,7 @@ typedef struct {
 } dadosjogador;
 
 char nickname[20], arquivo[20];
-char* arquivos[] = { "iniciante.txt", "intermediario.txt", "avancado.txt" };
+char* arquivos[] = { "../iniciante.txt", "../intermediario.txt", "../avancado.txt" };
 int matrizint[10][10], matriz[10][10], linhas[10], colunas[10];
 int size, vidas, fase = 0, arq = 0, pos = 0, morreu = 0, pont = 0, nvjog = 1, qtdjog = 0;
 dadosjogador ranking[100], jogadoratual;
@@ -33,12 +33,13 @@ int TmnLevel(char txt);
 void StartRanking();
 void AttRanking();
 void SaveRanking();
+int StoreRanking();
 
 int main() {
 
-    clear();
+     clear();
     printf("Seja bem vindo ao Sudoku ao Contrario!\n\nDigite seu nickname: ");
-    scanf("%s", nickname);
+    scanf("%[^\n]s", nickname);
     StartRanking(); //Se abriu meu jogo já merece entrar no ranking. Todos são vencedores!
 
     int opcao = 0;
@@ -150,7 +151,7 @@ int main() {
         }
     }
 
-    SaveRanking();
+    StoreRanking();
     fclose(fp);
     return 0;
 }
@@ -158,7 +159,6 @@ int main() {
 void clear(){
     system(CLEAR);  
 }
-
 
 void StartLevel() {
     // Abre o arquivo atual
@@ -478,4 +478,25 @@ void SaveRanking(){
     fwrite(&qtdjog, sizeof(int), 1, fr);
     fwrite(&ranking, sizeof(dadosjogador), qtdjog, fr);
     fclose(fr);
+}
+
+int StoreRanking(){
+    // Retira players com 0 pontos
+    if(jogadoratual.pontuacao == 0 && qtdjog == 1){
+        qtdjog = 0;
+        
+        fr = fopen("ranking.bin", "w+b");
+        fwrite(&qtdjog, sizeof(int), 1, fr);
+        fclose(fr);
+        return 0;
+    }
+    else if(jogadoratual.pontuacao == 0) qtdjog -= 1;
+
+    // Escreve os dados e fecha
+    fr = fopen("ranking.bin", "r+b");
+    fwrite(&qtdjog, sizeof(int), 1, fr);
+    fwrite(&ranking, sizeof(dadosjogador), qtdjog, fr);
+    fclose(fr);
+    
+    return 0;
 }
