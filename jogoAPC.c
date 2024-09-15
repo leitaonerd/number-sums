@@ -26,8 +26,10 @@ FILE* fp;
 FILE* fr;
 
 void clear();
+void LoadScreen();
 void StartLevel();
 void PrintMatriz();
+void PrintInstruc();
 int Jogar();
 int TmnLevel(char txt);
 void StartRanking();
@@ -37,8 +39,9 @@ int StoreRanking();
 
 int main() {
 
-     clear();
-    printf("Seja bem vindo ao Sudoku ao Contrario!\n\nDigite seu nickname: ");
+    clear();
+    LoadScreen();
+    printf("Seja bem vindo ao Somador!\n\nDigite seu nickname: ");
     scanf("%[^\n]s", nickname);
     StartRanking(); //Se abriu meu jogo já merece entrar no ranking. Todos são vencedores!
 
@@ -61,7 +64,7 @@ int main() {
         }
         else if(opcao == 2){
             // Configurações
-            OP: clear(); // Clamo benevolência, meus prezados monitores e/ou professora, mas foi uma otimização necessária
+            OP: clear();
             printf("*** CONFIGURACOES ***\n\n");
             printf("1 - Zerar Ranking\n2 - Modo de Dificuldade\n3 - Voltar ao menu principal\n\n");
             printf("Digite a opcao desejada: ");
@@ -77,7 +80,7 @@ int main() {
                 if(a == 'N' || a == 'n'){
                     config = 0;
                     opcao = 2;
-                    goto OP; // Novamente, perdão! Mas foi inevitável
+                    goto OP; // Clamo benevolência, meus prezados monitores e/ou professora, mas foi uma otimização necessária
                 }
                 else if(a == 'S' || a == 's'){
                     fclose(fr);
@@ -104,7 +107,7 @@ int main() {
                     printf("Opcao invalida. Tecle <enter> e escolha novamente.");
                     getchar();
                     getchar();
-                    goto DIF;
+                    goto DIF; // :)
                 }
                 else{
                     printf("\n\nConfigurado para modo ");
@@ -121,21 +124,14 @@ int main() {
                     getchar();
                     getchar();
                 }
-
             }
         }
         else if(opcao == 3){
             // Instruções
             clear();
-            printf("\n\nCOMO JOGAR O SUDOKU AO CONTRARIO\n\n");
-            printf("O objetivo deste jogo e simples, mas exige atencao e estrategia.\n\n");
-            printf("Acima e ao lado esquerdo do tabuleiro, existem alguns numeros que\ncorrespondem a soma da coluna abaixo ou da linha ao lado.\n");
-            printf("Voce deve informar as posicoes dos numeros que devem ser apagados para\nque restem apenas os numeros que, somados, resultem nessa soma.\n");
-            printf("Mas tome cuidado! Caso seja informado um numero que nao deve ser apagado, voce perdera 1 vida!\n\n");
-            printf("Agora voce ja entendeu como tudo funciona! Pressione <enter> para retornar ao menu\n");
+            PrintIntruc();
             getchar();
             getchar();
-            //perdão, mas eu nao quis fazer uma função auxiliar pras intruções
         }
         else if(opcao == 4){
             // Ranking
@@ -147,7 +143,6 @@ int main() {
             printf("\nTecle <enter> para continuar>");
             getchar();
             getchar();
-            
         }
     }
 
@@ -156,8 +151,22 @@ int main() {
     return 0;
 }
 
+
 void clear(){
     system(CLEAR);  
+}
+
+void LoadScreen(){
+    clear();
+    printf(" ::::::::   ::::::::  ::::    ::::      :::     :::::::::   ::::::::  ::::::::: \n");
+    printf(":+:    :+: :+:    :+: +:+:+: :+:+:+   :+: :+:   :+:    :+: :+:    :+: :+:    :+: \n");
+    printf("+:+        +:+    +:+ +:+ +:+:+ +:+  +:+   +:+  +:+    +:+ +:+    +:+ +:+    +:+ \n");
+    printf("+#++:++#++ +#+    +:+ +#+  +:+  +#+ +#++:++#++: +#+    +:+ +#+    +:+ +#++:++#:  \n");
+    printf("       +#+ +#+    +#+ +#+       +#+ +#+     +#+ +#+    +#+ +#+    +#+ +#+    +#+ \n");
+    printf("#+#    #+# #+#    #+# #+#       #+# #+#     #+# #+#    #+# #+#    #+# #+#    #+# \n");
+    printf(" ########   ########  ###       ### ###     ### #########   ########  ###    ### \n");
+    printf("\n");
+    printf("\n");
 }
 
 void StartLevel() {
@@ -297,6 +306,15 @@ void PrintMatriz() {
         printf("\n");
     }
     printf("*** Voce tem %d vidas ***\n", vidas);
+}
+
+void PrintIntruc(){
+    printf("\n\nCOMO JOGAR O SOMADOR\n\n");
+    printf("O objetivo deste jogo e simples, mas exige atencao e estrategia.\n\n");
+    printf("Acima e ao lado esquerdo do tabuleiro, existem alguns numeros que\ncorrespondem a soma da coluna abaixo ou da linha ao lado.\n");
+    printf("Voce deve informar as posicoes dos numeros que devem ser apagados para\nque restem apenas os numeros que, somados, resultem nessa soma.\n");
+    printf("Mas tome cuidado! Caso seja informado um numero que nao deve ser apagado, voce perdera 1 vida!\n\n");
+    printf("Agora voce ja entendeu como tudo funciona! Pressione <enter> para retornar ao menu\n");
 }
 
 int Jogar() {
