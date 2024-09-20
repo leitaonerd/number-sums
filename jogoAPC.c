@@ -1,6 +1,3 @@
-// Matrícula: 241020760
-// Rafael Medeiros de Alencar
-
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
